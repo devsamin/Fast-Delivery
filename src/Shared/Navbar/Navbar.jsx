@@ -42,7 +42,7 @@ const Navbar = () => {
             {navItem}
           </ul>
         </div>
-        <a className="btn btn-ghost text-xl"><FastDeliveryLogo/></a>
+        <a className="btn btn-ghost"><FastDeliveryLogo/></a>
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">
