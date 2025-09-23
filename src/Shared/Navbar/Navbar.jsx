@@ -50,7 +50,7 @@ const Navbar = () => {
         </ul>
       </div>
       <div className="navbar-end">
-        <a className="btn">Login</a>
+        <a className="btn bg-[#CAEB66]">Login</a>
       </div>
     </div>
   );

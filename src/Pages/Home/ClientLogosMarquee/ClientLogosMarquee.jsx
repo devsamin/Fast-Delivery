@@ -1,6 +1,4 @@
-import React from "react";
-
-// Array of company logos
+import React, { useState } from "react";
 import logo1 from "../../../assets/brands/amazon.png";
 import logo2 from "../../../assets/brands/amazon_vector.png";
 import logo3 from "../../../assets/brands/casio.png";
@@ -11,12 +9,21 @@ import logo7 from "../../../assets/brands/start.png";
 
 export default function ClientLogosMarquee() {
   const logos = [logo1, logo2, logo3, logo4, logo5, logo6, logo7];
+  const [isPaused, setIsPaused] = useState(false);
 
   return (
-    <div className="overflow-hidden bg-gray-50 py-6 ">
-        <h3 className="text-center font-semibold text-3xl m-5 p-5">Our Trusted Clients</h3>
-      <div className="animate-marquee whitespace-nowrap flex gap-16">
-        {logos.map((logo, index) => (
+    <div className="overflow-hidden bg-gray-50 py-6">
+      <h3 className="text-3xl font-bold text-center mb-12">
+        Our Trusted Clients
+      </h3>
+      <div
+        className={`whitespace-nowrap flex gap-16 items-center ${
+          isPaused ? "" : "animate-marquee"
+        }`}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        {logos.concat(logos).map((logo, index) => (
           <img
             key={index}
             src={logo}
@@ -24,18 +31,8 @@ export default function ClientLogosMarquee() {
             className="h-6 w-auto object-contain"
           />
         ))}
-        {/* Repeat logos to make it continuous */}
-        {logos.map((logo, index) => (
-          <img
-            key={`repeat-${index}`}
-            src={logo}
-            alt={`Company repeat ${index + 1}`}
-            className="h-16 w-auto object-contain"
-          />
-        ))}
       </div>
 
-      {/* Tailwind animation */}
       <style jsx>{`
         @keyframes marquee {
           0% {
@@ -46,7 +43,7 @@ export default function ClientLogosMarquee() {
           }
         }
         .animate-marquee {
-          display: inline-flex;
+          display: flex;
           animation: marquee 20s linear infinite;
         }
       `}</style>

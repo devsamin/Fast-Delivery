@@ -52,7 +52,7 @@ const servicesData = [
 const Services = () => {
   return (
     <section className="py-16 bg-gray-50">
-        <h2 className="text-3xl text-center font-semibold m-5 p-5">Our Servieces</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">Our Servieces</h2>
       <div className="max-w-6xl mx-auto px-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {servicesData.map((service) => (
           <Service key={service.title} service={service} />
