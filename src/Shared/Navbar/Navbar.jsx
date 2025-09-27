@@ -7,10 +7,16 @@ const Navbar = () => {
             <NavLink to={'/'}>Home</NavLink>
         </li>,
         <li>
-            <NavLink to={'/'}>About</NavLink>
+            <NavLink to={'/'}>Services</NavLink>
         </li>,
         <li>
-            <NavLink to={'/'}>Services</NavLink>
+            <NavLink to={'/'}>About Us</NavLink>
+        </li>,
+        <li>
+            <NavLink to={'/'}>Pricing</NavLink>
+        </li>,
+        <li>
+            <NavLink to={'/'}>Be a Rider</NavLink>
         </li>
     ]
   return (
