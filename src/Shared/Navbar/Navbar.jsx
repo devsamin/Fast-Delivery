@@ -4,7 +4,7 @@ import FastDeliveryLogo from "../FastDeliveryLogo/FastDeliveryLogo";
 const Navbar = () => {
     const navItem = [
         <li>
-            <NavLink to={'/'}>Home</NavLink>
+            <NavLink to={'/'}>Coverage</NavLink>
         </li>,
         <li>
             <NavLink to={'/'}>Services</NavLink>
