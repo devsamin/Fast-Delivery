@@ -1,11 +1,21 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import UseAuth from '../../../hooks/UseAuth';
 
 const Register = () => {
 
     const {register, handleSubmit, formState : {errors}} = useForm()
+    const {createUser} = UseAuth();
     const OnSubmit = (data)=>{
         console.log(data)
+        createUser(data.email, data.password)
+        .then(result=>{
+            const user = result.user;
+            console.log(user);
+        })
+        .catch(error=>{
+            console.log(error);
+        })
     }
     return (
       <div className="card-body">
