@@ -3,7 +3,7 @@ import marchantLogo from "../../../assets/location-merchant.png";
 const Merchant = () => {
   return (
     <div >
-        <h2 className="text-3xl font-bold text-center mb-12">Our First Priority</h2>
+        <h2 className="text-3xl font-bold text-center mb-12 ">Our First Priority</h2>
     {/* <div className="bg-no-repeat bg-base-200 bg-[url('assets/be-a-merchant-bg.png')]"> */}
     <div className="bg-no-repeat bg-base-200 ]">
       <div className="hero-content flex-col lg:flex-row-reverse">

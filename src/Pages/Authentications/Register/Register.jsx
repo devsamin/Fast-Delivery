@@ -1,6 +1,8 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import UseAuth from '../../../hooks/UseAuth';
+import { Link } from 'react-router-dom';
+import SocialLogin from '../../../SocialLogin/SocialLogin';
 
 const Register = () => {
 
@@ -27,8 +29,10 @@ const Register = () => {
           <label className="label">Password</label>
           <input type="password" {...register("password", {minLength : 8, required : true})} className="input" placeholder="Password" />
           {errors.password && <p className="text-red-600" role="alert">Password must be 8 character</p>}
-          <button className="btn btn-neutral mt-4">Register</button>
+          <button className="btn bg-[#CAEB66] mt-4 w-[320px]">Register</button>
         </form>
+        <p className='-mt-4'><small>Already Have An Account? <Link className='btn btn-link -ml-4 mb-1' to={'/login'}>Login</Link></small></p>
+        <SocialLogin></SocialLogin>
       </div>
 
     );

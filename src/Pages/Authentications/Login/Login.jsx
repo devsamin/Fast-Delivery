@@ -1,4 +1,6 @@
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
+import SocialLogin from "../../../SocialLogin/SocialLogin";
 
 
 const Login = () => {
@@ -20,8 +22,10 @@ const Login = () => {
         <div>
           <a className="link link-hover">Forgot password?</a>
         </div>
-        <button className="btn bg-[#CAEB66] hover:bg-[#c0ef32] mt-4">Login</button>
+        <button className="btn w-[320px] bg-[#CAEB66] hover:bg-[#c0ef32] mt-4">Login</button>
       </form>
+              <p className='-mt-4'><small>Don't Have Any Account? <Link className='btn btn-link -ml-4 mb-1' to={'/register'}>Register</Link></small></p>
+              <SocialLogin></SocialLogin>
     </div>
   );
 };
