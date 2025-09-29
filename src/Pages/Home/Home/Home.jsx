@@ -1,6 +1,7 @@
 import Banner from "../Banner/Banner";
 import Benefits from "../Benefits/Benefits";
 import ClientLogosMarquee from "../ClientLogosMarquee/ClientLogosMarquee";
+import CustomerReviewCarousel from "../CustomerReview/CustomerReviewCarousel";
 import HowItWorks from "../HowItWorks/HowItWorks";
 import Merchant from "../Merchant/Merchant";
 import QuickAnswers from "../QuickAnswers/QuickAnswers";
@@ -17,6 +18,7 @@ const Home = () => {
       <Benefits></Benefits>
       <Merchant></Merchant>
       <QuickAnswers/>
+      <CustomerReviewCarousel/>
     </div>
   );
 };
