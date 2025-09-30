@@ -4,7 +4,10 @@ import FastDeliveryLogo from "../FastDeliveryLogo/FastDeliveryLogo";
 const Navbar = () => {
     const navItem = [
         <li>
-            <NavLink to={'/'}>Coverage</NavLink>
+            <NavLink to={'coverage/'}>Coverage</NavLink>
+        </li>,
+        <li>
+            <NavLink to={'send-parcel'}>Send A Parcel</NavLink>
         </li>,
         <li>
             <NavLink to={'/'}>Services</NavLink>

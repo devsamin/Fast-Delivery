@@ -758,7 +758,7 @@ const Coverage = () => {
       <div className="flex justify-center">
         <MapContainer
           center={[23.685, 90.3563]} // Centered on Bangladesh
-          zoom={7}
+          zoom={9}
           maxBounds={bangladeshBounds}
           style={{ height: "500px", width: "90%", borderRadius: "12px" }}
         >
