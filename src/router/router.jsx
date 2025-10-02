@@ -4,7 +4,7 @@ import Home from "../Pages/Home/Home/Home";
 import AuthLayouts from "../Layouts/AuthLayouts";
 import Login from "../Pages/Authentications/Login/Login";
 import Register from "../Pages/Authentications/Register/Register";
-import Coverage from "../Pages/Authentications/Coverage/Coverage";
+import Coverage from "../Pages/Coverage/Coverage";
 import SendParcel from "../Pages/SendParcel/SendParcel";
 import PrivateRoute from "../routes/PrivetRoutes";
 export const router = createBrowserRouter([
@@ -22,7 +22,8 @@ export const router = createBrowserRouter([
       },
       {
         path : "send-parcel",
-        element : <PrivateRoute><SendParcel/></PrivateRoute>
+        element : <PrivateRoute><SendParcel/></PrivateRoute>,
+        loader : ()=>fetch('/public/ServiceArea.json')
       }
     ],
   },

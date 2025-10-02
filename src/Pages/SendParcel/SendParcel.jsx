@@ -1,18 +1,44 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
+import { useLoaderData } from "react-router-dom";
+
+
 
 const SendParcel = () => {
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm();
+  const serviceCenters = useLoaderData();
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm();
+
   const [pendingParcel, setPendingParcel] = useState(null);
 
-  const type = watch("type"); // watch parcel type
+  const type = watch("type");
+  const senderRegion = watch("senderRegion");
+  const receiverRegion = watch("receiverRegion");
 
-  // Cost calculation function
+  // Get unique regions
+  const regions = [...new Set(serviceCenters.map((sc) => sc.region))];
+
+  // Filter centers by region
+  const getCentersByRegion = (region) => {
+    if (!region) return [];
+    const filtered = serviceCenters.filter(
+  (sc) => sc.region.toLowerCase() === region?.toLowerCase()
+);
+    return filtered.flatMap((sc) => sc.covered_area);
+  };
+
+  // Cost calculation
   const calculateCost = (data) => {
     let baseCost = data.type === "document" ? 50 : 100;
     if (data.weight && data.type === "non-document") {
-      baseCost += parseFloat(data.weight) * 10; // Example: 10 per kg
+      baseCost += parseFloat(data.weight) * 10;
     }
     return baseCost;
   };
@@ -21,27 +47,23 @@ const SendParcel = () => {
     const cost = calculateCost(data);
     setPendingParcel({ ...data, cost });
 
-    toast(
-      (t) => (
-        <div className="p-2">
-          <p className="font-semibold">Estimated Cost: ৳{cost}</p>
-          <button
-            onClick={() => {
-              // Save to DB (mock)
-              console.log("Saved:", { ...data, creation_date: new Date() });
-              toast.dismiss(t.id);
-              toast.success("Parcel Added Successfully!");
-              reset();
-              setPendingParcel(null);
-            }}
-            className="btn btn-sm btn-primary mt-2"
-          >
-            Confirm
-          </button>
-        </div>
-      ),
-      { duration: 5000 }
-    );
+    toast((t) => (
+      <div className="p-2">
+        <p className="font-semibold">Estimated Cost: ৳{cost}</p>
+        <button
+          onClick={() => {
+            console.log("Saved:", { ...data, creation_date: new Date() });
+            toast.dismiss(t.id);
+            toast.success("Parcel Added Successfully!");
+            reset();
+            setPendingParcel(null);
+          }}
+          className="btn btn-sm btn-primary mt-2"
+        >
+          Confirm
+        </button>
+      </div>
+    ));
   };
 
   return (
@@ -60,28 +82,53 @@ const SendParcel = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Type */}
-            <div>
-              <label className="label">Type</label>
-              <select
-                {...register("type", { required: true })}
-                className="select select-bordered w-full"
-              >
-                <option value="">Select Type</option>
-                <option value="document">Document</option>
-                <option value="non-document">Non-Document</option>
-              </select>
-              {errors.type && <span className="text-error text-sm">Type is required</span>}
-            </div>
+{/* Type */}
+<div>
+  <label className="label">Parcel Type</label>
+  <div className="flex flex-col gap-2 mt-2">
+    <label className="flex items-center gap-2">
+      <input
+        type="radio"
+        value="document"
+        {...register("type", { required: true })}
+        className="radio w-5 h-5 border-[#b5ee08] checked:bg-[#b5ee08] checked:border-[#b5ee08] after:content-[''] after:bg-[#b5ee08]"
+      />
+      Document
+    </label>
+    <label className="flex items-center gap-2">
+      <input
+        type="radio"
+        value="non-document"
+        {...register("type", { required: true })}
+        className="radio w-5 h-5 border-[#bbdd55] checked:bg-[#bbdd55] checked:border-[#bbdd55] after:content-[''] after:bg-[#bbdd55]"
+      />
+      Non-Document
+    </label>
+  </div>
+  {errors.type && (
+    <span className="text-error text-sm">
+      Parcel Type is required
+    </span>
+  )}
+</div>
 
-            {/* Title */}
+
+
+
+            {/* Parcel Name */}
             <div>
-              <label className="label">Title</label>
+              <label className="label">Parcel Name</label>
               <input
                 type="text"
+                placeholder="Parcel Name"
                 {...register("title", { required: true })}
                 className="input input-bordered w-full"
               />
-              {errors.title && <span className="text-error text-sm">Title is required</span>}
+              {errors.title && (
+                <span className="text-error text-sm">
+                  Parcel Name is required
+                </span>
+              )}
             </div>
 
             {/* Weight */}
@@ -96,7 +143,9 @@ const SendParcel = () => {
                 className="input input-bordered w-full"
                 disabled={type === "document"}
               />
-              {errors.weight && <span className="text-error text-sm">Weight is required</span>}
+              {errors.weight && (
+                <span className="text-error text-sm">Weight is required</span>
+              )}
             </div>
           </div>
         </div>
@@ -122,16 +171,22 @@ const SendParcel = () => {
               className="select select-bordered w-full"
             >
               <option value="">Select Region</option>
-              <option value="dhaka">Dhaka</option>
-              <option value="ctg">Chattogram</option>
+              {regions.map((region, idx) => (
+                <option key={idx} value={region}>
+                  {region}
+                </option>
+              ))}
             </select>
             <select
               {...register("senderCenter", { required: true })}
               className="select select-bordered w-full"
             >
               <option value="">Select Service Center</option>
-              <option value="center1">Center 1</option>
-              <option value="center2">Center 2</option>
+              {getCentersByRegion(senderRegion).map((center, idx) => (
+                <option key={idx} value={center}>
+                  {center}
+                </option>
+              ))}
             </select>
             <input
               type="text"
@@ -169,16 +224,22 @@ const SendParcel = () => {
               className="select select-bordered w-full"
             >
               <option value="">Select Region</option>
-              <option value="dhaka">Dhaka</option>
-              <option value="ctg">Chattogram</option>
+              {regions.map((region, idx) => (
+                <option key={idx} value={region}>
+                  {region}
+                </option>
+              ))}
             </select>
             <select
               {...register("receiverCenter", { required: true })}
               className="select select-bordered w-full"
             >
               <option value="">Select Service Center</option>
-              <option value="center1">Center 1</option>
-              <option value="center2">Center 2</option>
+              {getCentersByRegion(receiverRegion).map((center, idx) => (
+                <option key={idx} value={center}>
+                  {center}
+                </option>
+              ))}
             </select>
             <input
               type="text"
