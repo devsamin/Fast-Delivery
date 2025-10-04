@@ -1,12 +1,12 @@
-import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import toast, { Toaster } from "react-hot-toast";
 import { useLoaderData } from "react-router-dom";
-
-
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
+import UseAuth from "../../hooks/UseAuth";
 
 const SendParcel = () => {
   const serviceCenters = useLoaderData();
+  const user = UseAuth(); // current logged-in user
 
   const {
     register,
@@ -16,104 +16,153 @@ const SendParcel = () => {
     formState: { errors },
   } = useForm();
 
-  const [pendingParcel, setPendingParcel] = useState(null);
-
   const type = watch("type");
   const senderRegion = watch("senderRegion");
   const receiverRegion = watch("receiverRegion");
 
-  // Get unique regions
+  // Unique regions
   const regions = [...new Set(serviceCenters.map((sc) => sc.region))];
 
-  // Filter centers by region
+  // Centers by region
   const getCentersByRegion = (region) => {
     if (!region) return [];
     const filtered = serviceCenters.filter(
-  (sc) => sc.region.toLowerCase() === region?.toLowerCase()
-);
+      (sc) => sc.region.toLowerCase() === region?.toLowerCase()
+    );
     return filtered.flatMap((sc) => sc.covered_area);
   };
 
   // Cost calculation
   const calculateCost = (data) => {
-    let baseCost = data.type === "document" ? 50 : 100;
-    if (data.weight && data.type === "non-document") {
-      baseCost += parseFloat(data.weight) * 10;
+    let baseCost = data.type === "document" ? 50 : 150;
+    let extraCharges = 0;
+
+    if (data.type === "non-document") {
+      const weight = parseFloat(data.weight || 0);
+
+      if (weight > 3) {
+        const extraKg = weight - 3;
+        extraCharges += extraKg * 40; // 40tk per extra kg
+      }
+
+      if (senderRegion !== receiverRegion) {
+        extraCharges += 40; // outside district charge
+      }
     }
-    return baseCost;
+
+    return {
+      baseCost,
+      extraCharges,
+      total: baseCost + extraCharges,
+    };
   };
 
   const sendParcel = (data) => {
-    const cost = calculateCost(data);
-    setPendingParcel({ ...data, cost });
+    const { baseCost, extraCharges, total } = calculateCost(data);
 
-    toast((t) => (
-      <div className="p-2">
-        <p className="font-semibold">Estimated Cost: ৳{cost}</p>
-        <button
-          onClick={() => {
-            console.log("Saved:", { ...data, creation_date: new Date() });
-            toast.dismiss(t.id);
-            toast.success("Parcel Added Successfully!");
-            reset();
-            setPendingParcel(null);
-          }}
-          className="btn btn-sm btn-primary mt-2"
-        >
-          Confirm
-        </button>
-      </div>
-    ));
+    Swal.fire({
+      title: "Delivery Cost Breakdown",
+      html: `
+        <div class="text-left space-y-2">
+          <p><strong>Parcel Type:</strong> ${data.type}</p>
+          <p><strong>Weight:</strong> ${data.weight || "-"} kg</p>
+          <p><strong>Delivery Zone:</strong> ${
+            senderRegion === receiverRegion ? "Inside District" : "Outside District"
+          }</p>
+          <hr/>
+          <p><strong>Base Cost:</strong> ৳${baseCost}</p>
+          <p><strong>Extra Charges:</strong> ৳${extraCharges}</p>
+          <p class="text-xl font-bold text-green-600">Total Cost: ৳${total}</p>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "✅ Proceed to Payment",
+      cancelButtonText: "✖ Continue Editing",
+      customClass: {
+        popup: "rounded-xl shadow-lg p-6",
+        confirmButton:
+          "bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg",
+        cancelButton:
+          "bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg ml-2",
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // ✅ Build parcel object
+        const parcel = {
+          ...data,
+          cost: total,
+          baseCost,
+          extraCharges,
+          tracking_id: `PCL-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          payment_status: "unpaid", // change to "paid" after payment integration
+          delivery_status: "not_collected",
+          creation_date: new Date().toISOString(),
+          createdBy: user?.email || "guest",
+        };
+
+        console.log("Saved Parcel:", parcel);
+
+        Swal.fire("Success!", "Parcel Added Successfully!", "success");
+
+        // ✅ Example: Send to backend API
+        /*
+        fetch("http://localhost:5000/parcels", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(parcel),
+        })
+          .then((res) => res.json())
+          .then((result) => {
+            console.log("Parcel saved:", result);
+          });
+        */
+
+        reset();
+      }
+    });
   };
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-base-200 rounded-xl shadow-md">
-      <Toaster />
-
       <h2 className="text-3xl font-bold mb-2 text-center">Send Parcel</h2>
       <p className="text-center font-semibold text-[#b8f208] mb-6">
         Please provide pickup & delivery details for your parcel
       </p>
 
       <form onSubmit={handleSubmit(sendParcel)} className="space-y-6">
-        {/* Parcel Info */}
+        {/* === Parcel Info === */}
         <div className="p-4 bg-base-100 rounded-lg shadow">
           <h3 className="font-semibold text-lg mb-3">Parcel Info</h3>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Type */}
-{/* Type */}
-<div>
-  <label className="label">Parcel Type</label>
-  <div className="flex flex-col gap-2 mt-2">
-    <label className="flex items-center gap-2">
-      <input
-        type="radio"
-        value="document"
-        {...register("type", { required: true })}
-        className="radio w-5 h-5 border-[#b5ee08] checked:bg-[#b5ee08] checked:border-[#b5ee08] after:content-[''] after:bg-[#b5ee08]"
-      />
-      Document
-    </label>
-    <label className="flex items-center gap-2">
-      <input
-        type="radio"
-        value="non-document"
-        {...register("type", { required: true })}
-        className="radio w-5 h-5 border-[#bbdd55] checked:bg-[#bbdd55] checked:border-[#bbdd55] after:content-[''] after:bg-[#bbdd55]"
-      />
-      Non-Document
-    </label>
-  </div>
-  {errors.type && (
-    <span className="text-error text-sm">
-      Parcel Type is required
-    </span>
-  )}
-</div>
-
-
-
+            <div>
+              <label className="label">Parcel Type</label>
+              <div className="flex flex-col gap-2 mt-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value="document"
+                    {...register("type", { required: true })}
+                    className="radio w-5 h-5 border-[#b5ee08] checked:bg-[#b5ee08]"
+                  />
+                  Document
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value="non-document"
+                    {...register("type", { required: true })}
+                    className="radio w-5 h-5 border-[#bbdd55] checked:bg-[#bbdd55]"
+                  />
+                  Non-Document
+                </label>
+              </div>
+              {errors.type && (
+                <span className="text-error text-sm">
+                  Parcel Type is required
+                </span>
+              )}
+            </div>
 
             {/* Parcel Name */}
             <div>
@@ -124,11 +173,6 @@ const SendParcel = () => {
                 {...register("title", { required: true })}
                 className="input input-bordered w-full"
               />
-              {errors.title && (
-                <span className="text-error text-sm">
-                  Parcel Name is required
-                </span>
-              )}
             </div>
 
             {/* Weight */}
@@ -143,14 +187,11 @@ const SendParcel = () => {
                 className="input input-bordered w-full"
                 disabled={type === "document"}
               />
-              {errors.weight && (
-                <span className="text-error text-sm">Weight is required</span>
-              )}
             </div>
           </div>
         </div>
 
-        {/* Sender Info */}
+        {/* === Sender Info === */}
         <div className="p-4 bg-base-100 rounded-lg shadow">
           <h3 className="font-semibold text-lg mb-3">Sender Info</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -188,22 +229,10 @@ const SendParcel = () => {
                 </option>
               ))}
             </select>
-            <input
-              type="text"
-              placeholder="Address"
-              {...register("senderAddress", { required: true })}
-              className="input input-bordered w-full"
-            />
-            <input
-              type="text"
-              placeholder="Pickup Instruction"
-              {...register("pickupInstruction", { required: true })}
-              className="input input-bordered w-full"
-            />
           </div>
         </div>
 
-        {/* Receiver Info */}
+        {/* === Receiver Info === */}
         <div className="p-4 bg-base-100 rounded-lg shadow">
           <h3 className="font-semibold text-lg mb-3">Receiver Info</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -241,21 +270,10 @@ const SendParcel = () => {
                 </option>
               ))}
             </select>
-            <input
-              type="text"
-              placeholder="Address"
-              {...register("receiverAddress", { required: true })}
-              className="input input-bordered w-full"
-            />
-            <input
-              type="text"
-              placeholder="Delivery Instruction"
-              {...register("deliveryInstruction", { required: true })}
-              className="input input-bordered w-full"
-            />
           </div>
         </div>
 
+        {/* === Submit Button === */}
         <div className="text-center">
           <button type="submit" className="btn bg-[#bbdd55] px-8">
             Submit
